@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: beta
+
+
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-recreate-deployment
+spec:
+ strategy:
+  type: Recreate
+ replicas: 1
+ selector:
+   matchLabels:
+    app: app2-nginx
+ template:
+   metadata:
+    name: app2-pod
+    labels:
+     app: app2-nginx
+   spec:
+     containers:
+     - name: app2-nginx
+       image: nagpcontainerregistry.azurecr.io/dockerdeploy:latest
+       env:
+       - name: Application_Name
+         valueFrom:
+            secretKeyRef:
+              name: app1-secret
+              key: Application_Username
+       - name: Application_Password
+         valueFrom:
+            secretKeyRef:
+              name: app1-secret
+              key: Application_Password
+       - name: Application_ConnectionString
+         valueFrom:
+            configMapKeyRef:
+              name: app1-configmap
+              key: Application_ConnectionString
+       - name: Application_Environment
+         value: beta
+       ports:
+        - containerPort: 80
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2-nginx-loadbalancer-service
+  labels:
+    app: app2-nginx
+spec:
+  type: LoadBalancer
+  selector:
+    app: app2-nginx
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30081
+  externalIPs:
+    - "10.244.0.16"

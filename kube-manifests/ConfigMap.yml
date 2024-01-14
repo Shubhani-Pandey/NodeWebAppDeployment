@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Secret
+metadata: 
+  name: app1-secret
+type: Opaque
+data:
+    Application_Username: U2h1Ymhhbmk=
+    Application_Password: U2h1YmhhbmlfUGFzc3dvcmQ=
+
+    
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app1-configmap
+data:
+  Application_ConnectionString: some_random_string
